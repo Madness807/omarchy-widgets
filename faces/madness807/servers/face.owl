@@ -1177,13 +1177,14 @@ fi
 echo ready-3.0.4""") every 1h timeout 30s
 
   source now = clock every 5s
-  source st = cmd(setup == "ready-3.0.4" ? "python3 ~/.local/share/servers-face/pyweb-3.0.4.py status" : null) every 15s timeout 20s json
-  // each server's stack and the system's, only while that tab shows
-  source stk = cmd(setup == "ready-3.0.4" && tab == "stack" ? "python3 ~/.local/share/servers-face/pyweb-3.0.4.py stack" : null) every 10m timeout 30s json
+  // Fixed commands (the store's review reads them as they are): each waits for pyweb to be installed.
+  source st = cmd("f=~/.local/share/servers-face/pyweb-3.0.4.py; [ -f $f ] && python3 $f status") every 15s timeout 20s json
+  // each server's stack and the system's
+  source stk = cmd("f=~/.local/share/servers-face/pyweb-3.0.4.py; [ -f $f ] && python3 $f stack") every 10m timeout 30s json
   // updates: looked for at most every 6 h (pyweb keeps the result), read by stack
-  source upd = cmd(setup == "ready-3.0.4" ? "python3 ~/.local/share/servers-face/pyweb-3.0.4.py updates" : null) every 6h timeout 150s json
-  // projects found on this phone, while the list is empty or the add form is open
-  source found = cmd(setup == "ready-3.0.4" && (form == "add" || (st != null && len(st.servers.filter(s => s.listed)) == 0)) ? "python3 ~/.local/share/servers-face/pyweb-3.0.4.py suggest" : null) every 10m timeout 30s json
+  source upd = cmd("f=~/.local/share/servers-face/pyweb-3.0.4.py; [ -f $f ] && python3 $f updates") every 6h timeout 150s json
+  // projects found on this phone, offered while the list is empty and in the add form
+  source found = cmd("f=~/.local/share/servers-face/pyweb-3.0.4.py; [ -f $f ] && python3 $f suggest") every 10m timeout 30s json
   source sys = android.system every 30s
   source bat = android.battery
 
@@ -1640,7 +1641,7 @@ echo ready-3.0.4""") every 1h timeout 30s
         Column {
           gap: 0
           weight: 1
-          onTap: tab = t
+          onTap: { tab = t; if t == "stack" { refresh() } }
           Text { text: t == "servers" ? "servers" : "tech stack"; style: small; bold: tab == t; color: tab == t ? background : foreground; align: center; fill: width; padding: [0, 9]; background: tab == t ? accent : alpha(background, tileOpacity); radius: 12 * corners }
         }
       }
