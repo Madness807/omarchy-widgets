@@ -478,7 +478,7 @@ widget "stargate" {
       text: t < 0 ? "tap to dial" : alarmOn && t < 7 ? "off-world activation!" : status
       style: small; align: center; maxLines: 1; color: statusColor
     }
-    if rows >= 3 && t >= 0 && dir == "out" {
+    if (tileHeight ?? 0) >= 140 && t >= 0 && dir == "out" {
       Text {
         text: join(full.take(locked).map(g => pad(g, 2, "0")), "·")
         font: mono; fontSize: 10; align: center; color: muted; maxLines: 1
